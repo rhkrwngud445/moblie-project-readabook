@@ -1,18 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".feature.main.MainActivity">
+<layout>
+    <data>
+        <variable
+            name="mainVm"
+            type="com.book.readabook.feature.main.MainViewModel" />
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".feature.main.MainActivity">
+        <View
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/view1_main"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Read a book"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:layout_marginTop="100dp"
+            android:textSize="30sp"
+            android:fontFamily="@font/montserrat_bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Read a book"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/view1_main" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_main_start"
+            android:paddingBottom="12dp"
+            android:paddingTop="12dp"
+            android:textColor="#ffffff"
+            android:paddingRight="60dp"
+            android:paddingLeft="60dp"
+            android:background="@drawable/main_botton"
+            android:textStyle="bold"
+            android:layout_marginBottom="40dp"
+            app:layout_constraintBottom_toTopOf="@id/tv_main_record"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:textSize="25sp"
+            android:text="시작"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/tv_main_record"
+            android:paddingBottom="12dp"
+            android:paddingTop="12dp"
+            android:textColor="#ffffff"
+            android:paddingRight="60dp"
+            android:paddingLeft="60dp"
+            android:background="@drawable/main_botton"
+            android:textStyle="bold"
+            android:layout_marginBottom="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:textSize="25sp"
+            android:text="기록"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
