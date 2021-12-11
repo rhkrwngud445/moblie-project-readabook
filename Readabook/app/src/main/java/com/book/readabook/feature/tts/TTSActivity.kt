@@ -4,8 +4,10 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
@@ -13,14 +15,22 @@ import android.widget.Toast.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.book.readabook.R
 import com.book.readabook.databinding.ActivityRecordBinding
 import com.book.readabook.databinding.ActivityTtsBinding
 import com.book.readabook.feature.record.RecordViewModel
+import java.io.File
+import java.io.IOException
+import java.util.*
+
+
+// 카메라 찍는 화면을 mainActivity에서 하는건 어떨까? - 카메라intent에서 뒤로가기 버튼을 누를때의 처리 고민
 
 class TTSActivity : AppCompatActivity() {
+    lateinit var currentPhotoPath: String
     private var binding: ActivityTtsBinding? = null
 
     private val viewModel: TTSViewModel by lazy {
@@ -41,7 +51,6 @@ class TTSActivity : AppCompatActivity() {
     }
 
     fun checkPermission() {
-
         // 1. 위험권한(Camera) 권한 승인상태 가져오기
         val cameraPermission =
             ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
@@ -57,9 +66,28 @@ class TTSActivity : AppCompatActivity() {
 
 
     private fun dispatchTakePictureIntent() {
+        // 이부분이 데이터는 가져오지 못하고 있는거 같음
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        this,
+                        "com.book.readabook.fileprovider",
+                        it
+                    )
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, 2)
+                }
             }
         }
     }
@@ -98,7 +126,7 @@ class TTSActivity : AppCompatActivity() {
             if (requestCode == 2) {
                 var ImnageData: Uri? = data?.data
                 makeText(
-                    this, ImnageData.toString(),
+                    this, currentPhotoPath,
                     LENGTH_SHORT
                 ).show()
                 try {
@@ -109,6 +137,21 @@ class TTSActivity : AppCompatActivity() {
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 val imageBitmap: Bitmap? = data?.extras?.get("data") as Bitmap
             }
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
         }
     }
 }
