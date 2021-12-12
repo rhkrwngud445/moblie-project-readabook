@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -50,6 +51,10 @@ dependencies {
     def lifecycle_version = "2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+    //room
+    implementation 'androidx.room:room-runtime:2.2.6'
+    kapt 'androidx.room:room-compiler:2.2.6'
 
     // okhttp interceptor
     implementation 'com.squareup.okhttp3:okhttp:4.8.0'

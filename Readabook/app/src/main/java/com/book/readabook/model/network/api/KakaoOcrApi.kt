@@ -12,5 +12,6 @@ interface KakaoOcrApi{
 
     @Multipart
     @POST("/v2/vision/text/ocr")
-    suspend fun getTextOcr(@Header("Authorization") authorization : String,@Part file : MultipartBody.Part) : Response<OcrResponse>
+    suspend fun getTextOcr(@Header("Authorization") authorization : String,
+                           @Part file : MultipartBody.Part) : Response<OcrResponse>
 }

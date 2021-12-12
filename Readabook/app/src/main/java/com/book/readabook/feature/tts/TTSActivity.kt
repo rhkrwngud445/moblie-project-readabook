@@ -31,6 +31,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.*
 import android.graphics.BitmapFactory
+import android.os.Build
+import android.speech.tts.TextToSpeech
 import androidx.core.net.toUri
 import java.io.ByteArrayOutputStream
 
@@ -40,6 +42,7 @@ import java.io.ByteArrayOutputStream
 class TTSActivity : AppCompatActivity() {
     lateinit var currentPhotoPath: String
     private var binding: ActivityTtsBinding? = null
+    var text : String? = null
 
     private val viewModel: TTSViewModel by lazy {
         ViewModelProvider(this).get(TTSViewModel::class.java)
@@ -57,6 +60,8 @@ class TTSActivity : AppCompatActivity() {
         }
         checkPermission()
         initViewModel()
+        initClickListener()
+        initTextToSpeech()
     }
 
     fun checkPermission() {
@@ -172,7 +177,7 @@ class TTSActivity : AppCompatActivity() {
 
     private fun initViewModel(){
         viewModel.get_response.observe(this, androidx.lifecycle.Observer {
-            var text : String? = null
+
             if(it.result!!.size!=0){
                 for(i in 0..it.result!!.size-1){
                     text+= it.result[i]!!.recognition_words!!.get(0)
@@ -182,7 +187,42 @@ class TTSActivity : AppCompatActivity() {
             binding!!.tvOcr.text= text
         })
     }
+    private var tts: TextToSpeech? = null
 
-    //ocr 통신 성공 데이터 받을 틀 다시
+    private fun initTextToSpeech() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {   // 롤리팝(api level: 21, android 5.0) 이상에서 지원
+            Toast.makeText(this, "SDK version is low", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        tts = TextToSpeech(this) {
+            if (it == TextToSpeech.SUCCESS) {
+                val result = tts?.setLanguage(Locale.KOREAN)
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Toast.makeText(this, "Language not supported", Toast.LENGTH_SHORT).show()
+                }
+                Toast.makeText(this, "TTS setting successed", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "TTS init failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun ttsSpeak(strTTS: String) {
+        tts?.speak(strTTS, TextToSpeech.QUEUE_ADD, null, null)
+    }
+    private fun initClickListener(){
+        binding!!.btTts.setOnClickListener {
+            if(text!=null){
+                ttsSpeak(text!!)
+            }
+            else{
+                makeText(this,"text is empty!",Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
+    // 1. tts button
+    // 2. database for record(date, content)
 
 }
