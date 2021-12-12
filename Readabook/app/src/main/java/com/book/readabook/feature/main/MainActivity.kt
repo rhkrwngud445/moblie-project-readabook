@@ -41,8 +41,4 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, RecordActivity::class.java))
         }
     }
-
-
-
-
 }

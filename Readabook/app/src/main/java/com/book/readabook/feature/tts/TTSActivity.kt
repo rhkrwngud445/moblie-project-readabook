@@ -22,6 +22,10 @@ import com.book.readabook.R
 import com.book.readabook.databinding.ActivityRecordBinding
 import com.book.readabook.databinding.ActivityTtsBinding
 import com.book.readabook.feature.record.RecordViewModel
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -125,11 +129,10 @@ class TTSActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == 2) {
                 var ImnageData: Uri? = data?.data
-                makeText(
-                    this, currentPhotoPath,
-                    LENGTH_SHORT
-                ).show()
+                createMultipartFile()
+
                 try {
+
                     val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, ImnageData)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -153,5 +156,13 @@ class TTSActivity : AppCompatActivity() {
             // Save a file: path for use with ACTION_VIEW intents
             currentPhotoPath = absolutePath
         }
+    }
+
+    fun createMultipartFile(){
+        val file = File(currentPhotoPath)
+        val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(),file)
+        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+        viewModel.getTextOcr("KakaoAK "+getString(R.string.kakao_key),body)
+
     }
 }
