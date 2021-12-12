@@ -28,7 +28,11 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
+import android.graphics.BitmapFactory
+import androidx.core.net.toUri
+import java.io.ByteArrayOutputStream
 
 
 // 카메라 찍는 화면을 mainActivity에서 하는건 어떨까? - 카메라intent에서 뒤로가기 버튼을 누를때의 처리 고민
@@ -158,11 +162,29 @@ class TTSActivity : AppCompatActivity() {
         }
     }
 
-    fun createMultipartFile(){
+    fun createMultipartFile() {
         val file = File(currentPhotoPath)
-        val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(),file)
-        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-        viewModel.getTextOcr("KakaoAK "+getString(R.string.kakao_key),body)
+        var inputStream: InputStream? = null
+        try {
+            inputStream = baseContext.getContentResolver().openInputStream(file.toUri())
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        val nh = (bitmap.getHeight() * (512.0 / bitmap.getWidth()))
+        val scaled = Bitmap.createScaledBitmap(bitmap, 512, nh.toInt(), true)
+        scaled.compress(Bitmap.CompressFormat.JPEG, 20, byteArrayOutputStream)
+        val requestFile = RequestBody.create(
+            "image/jpeg".toMediaTypeOrNull(),
+            byteArrayOutputStream.toByteArray()
+        )
+        val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
+        viewModel.getTextOcr("KakaoAK " + getString(R.string.kakao_key), body)
 
     }
+
+    //ocr 통신 성공 데이터 받을 틀 다시
+
 }
