@@ -56,6 +56,7 @@ class TTSActivity : AppCompatActivity() {
             ttsVm = viewModel
         }
         checkPermission()
+        initViewModel()
     }
 
     fun checkPermission() {
@@ -74,19 +75,13 @@ class TTSActivity : AppCompatActivity() {
 
 
     private fun dispatchTakePictureIntent() {
-        // 이부분이 데이터는 가져오지 못하고 있는거 같음
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
-                // Create the File where the photo should go
                 val photoFile: File? = try {
                     createImageFile()
                 } catch (ex: IOException) {
-                    // Error occurred while creating the File
-
                     null
                 }
-                // Continue only if the File was successfully created
                 photoFile?.also {
                     val photoURI: Uri = FileProvider.getUriForFile(
                         this,
@@ -132,17 +127,7 @@ class TTSActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == 2) {
-                var ImnageData: Uri? = data?.data
                 createMultipartFile()
-
-                try {
-
-                    val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, ImnageData)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                val imageBitmap: Bitmap? = data?.extras?.get("data") as Bitmap
             }
         }
     }
@@ -183,6 +168,19 @@ class TTSActivity : AppCompatActivity() {
         val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
         viewModel.getTextOcr("KakaoAK " + getString(R.string.kakao_key), body)
 
+    }
+
+    private fun initViewModel(){
+        viewModel.get_response.observe(this, androidx.lifecycle.Observer {
+            var text : String? = null
+            if(it.result!!.size!=0){
+                for(i in 0..it.result!!.size-1){
+                    text+= it.result[i]!!.recognition_words!!.get(0)
+                    text+="\n"
+                }
+            }
+            binding!!.tvOcr.text= text
+        })
     }
 
     //ocr 통신 성공 데이터 받을 틀 다시
