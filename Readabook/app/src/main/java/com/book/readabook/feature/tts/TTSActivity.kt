@@ -34,6 +34,11 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.speech.tts.TextToSpeech
 import androidx.core.net.toUri
+import com.book.readabook.global.Application
+import com.book.readabook.model.data.RecordData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
 
@@ -44,11 +49,10 @@ class TTSActivity : AppCompatActivity() {
     private var binding: ActivityTtsBinding? = null
     var text : String? = null
 
-    private val viewModel: TTSViewModel by lazy {
-        ViewModelProvider(this).get(TTSViewModel::class.java)
+    private val viewModel by lazy {
+        ViewModelProvider(this, TTSViewModel.Factory(application as Application)).get(TTSViewModel::class.java)
     }
 
-    private val REQUEST_IMAGE_CAPTURE = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +63,7 @@ class TTSActivity : AppCompatActivity() {
             ttsVm = viewModel
         }
         checkPermission()
-        initViewModel()
+        initObserve()
         initClickListener()
         initTextToSpeech()
     }
@@ -175,9 +179,8 @@ class TTSActivity : AppCompatActivity() {
 
     }
 
-    private fun initViewModel(){
+    private fun initObserve(){
         viewModel.get_response.observe(this, androidx.lifecycle.Observer {
-
             if(it.result!!.size!=0){
                 for(i in 0..it.result!!.size-1){
                     text+= it.result[i]!!.recognition_words!!.get(0)
@@ -185,8 +188,14 @@ class TTSActivity : AppCompatActivity() {
                 }
             }
             binding!!.tvOcr.text= text
+            if(text!= null) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    viewModel.insert(RecordData(text!!))
+                }
+            }
         })
     }
+
     private var tts: TextToSpeech? = null
 
     private fun initTextToSpeech() {
@@ -211,6 +220,7 @@ class TTSActivity : AppCompatActivity() {
     private fun ttsSpeak(strTTS: String) {
         tts?.speak(strTTS, TextToSpeech.QUEUE_ADD, null, null)
     }
+
     private fun initClickListener(){
         binding!!.btTts.setOnClickListener {
             if(text!=null){
@@ -224,5 +234,6 @@ class TTSActivity : AppCompatActivity() {
 
     // 1. tts button
     // 2. database for record(date, content)
+    // https://m.blog.naver.com/yuyyulee/221531478175
 
 }

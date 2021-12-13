@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         binding!!.tvMainStart.setOnClickListener {
             startActivity(Intent(this, TTSActivity::class.java))
         }
+
         binding!!.tvMainRecord.setOnClickListener {
             startActivity(Intent(this, RecordActivity::class.java))
         }

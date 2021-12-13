@@ -6,5 +6,4 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "recordData")
 data class RecordData(var text : String){
     @PrimaryKey(autoGenerate = true) var id: Int = 0
-
 }

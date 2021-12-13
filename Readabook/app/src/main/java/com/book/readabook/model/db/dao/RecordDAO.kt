@@ -14,5 +14,4 @@ interface RecordDAO {
 
     @Delete
     fun delete(recordData: RecordData)
-
 }
